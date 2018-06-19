@@ -578,6 +578,24 @@ class WorkflowTest extends TestCase
         $this->assertSame('to_a', $transitions[1]->getName());
         $this->assertSame('to_a', $transitions[2]->getName());
     }
+
+    public function testTransitionsWithCondition()
+    {
+        $definition = $this->createWorkflowDefinitionWithCondition();
+        $subject = new \stdClass();
+        $subject->marking = ['a' => 1];
+        $subject->useB = true;
+        $workflow = new Workflow($definition, new MultipleStateMarkingStore());
+
+        $transitions = $workflow->getEnabledTransitions($subject);
+        $this->assertCount(1, $transitions);
+        $this->assertSame('tc', $transitions[0]->getName());
+        $workflow->apply($subject, 'tc');
+        $marking = $workflow->getMarking($subject);
+        $this->assertFalse($marking->has('a'));
+        $this->assertTrue($marking->has('b'));
+        $this->assertFalse($marking->has('c'));
+    }
 }
 
 class EventDispatcherMock implements \Symfony\Component\EventDispatcher\EventDispatcherInterface

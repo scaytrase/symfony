@@ -5,6 +5,7 @@ namespace Symfony\Component\Workflow\Tests;
 use Symfony\Component\Workflow\Definition;
 use Symfony\Component\Workflow\Metadata\InMemoryMetadataStore;
 use Symfony\Component\Workflow\Transition;
+use Symfony\Component\Workflow\Routing\Place;
 
 trait WorkflowBuilderTrait
 {
@@ -142,5 +143,28 @@ trait WorkflowBuilderTrait
         //             +-----+              |
         //             |  d  | -------------+
         //             +-----+
+    }
+
+    private function createWorkflowDefinitionWithCondition()
+    {
+        $places = range('a', 'c');
+
+        $transitions = array();
+        $transitions[] = new Transition('tc', 'a', [
+            new Place('b'),
+            new Place('c', '!subject.useB')
+        ]);
+
+        return new Definition($places, $transitions);
+
+        // The graph looks like:
+        //
+        //
+        //                              +---+
+        // +---+     +----+      /\---> | b |
+        // | a | --> | t1 | --> /  \    +---+
+        // +---+     +----+     \  /    +---+
+        //                       \/---> | c |
+        //                              +---+
     }
 }
