@@ -168,20 +168,22 @@ class GraphvizDumper implements DumperInterface
         foreach ($definition->getTransitions() as $i => $transition) {
             $transitionName = $workflowMetadata->getMetadata('label', $transition) ?? $transition->getName();
 
-            foreach ($transition->getFroms() as $from) {
+            foreach ($transition->getFromPlaces() as $from) {
                 $dotEdges[] = [
-                    'from' => $from,
+                    'from' => $from->getPlaceName(),
                     'to' => $transitionName,
                     'direction' => 'from',
                     'transition_number' => $i,
+                    'condition' => $from->getCondition(),
                 ];
             }
-            foreach ($transition->getTos() as $to) {
+            foreach ($transition->getToPlaces() as $to) {
                 $dotEdges[] = [
                     'from' => $transitionName,
-                    'to' => $to,
+                    'to' => $to->getPlaceName(),
                     'direction' => 'to',
                     'transition_number' => $i,
+                    'condition' => $to->getCondition(),
                 ];
             }
         }
@@ -198,14 +200,16 @@ class GraphvizDumper implements DumperInterface
 
         foreach ($edges as $edge) {
             if ('from' === $edge['direction']) {
-                $code .= sprintf("  place_%s -> transition_%s [style=\"solid\"];\n",
+                $code .= sprintf("  place_%s -> transition_%s [style=\"solid\"%s];\n",
                     $this->dotize($edge['from']),
-                    $this->dotize($edge['transition_number'])
+                    $this->dotize($edge['transition_number']),
+                    $edge['condition'] ? sprintf(' label="%s"', $edge['condition']): ''
                 );
             } else {
-                $code .= sprintf("  transition_%s -> place_%s [style=\"solid\"];\n",
+                $code .= sprintf("  transition_%s -> place_%s [style=\"solid\"%s];\n",
                     $this->dotize($edge['transition_number']),
-                    $this->dotize($edge['to'])
+                    $this->dotize($edge['to']),
+                    $edge['condition'] ? sprintf(' label="%s"', $edge['condition']): ''
                 );
             }
         }

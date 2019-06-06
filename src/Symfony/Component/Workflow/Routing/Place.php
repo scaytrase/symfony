@@ -13,12 +13,12 @@ class Place
         $this->condition = $condition;
     }
 
-    public function getPlaceName()
+    public function getPlaceName(): string
     {
         return $this->placeName;
     }
 
-    public function getCondition()
+    public function getCondition(): ?string
     {
         return $this->condition;
     }
